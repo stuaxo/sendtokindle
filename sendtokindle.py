@@ -12,13 +12,13 @@ import os
 import re
 import sys
 from os import path
-from StringIO import StringIO
+from io import StringIO
 import json
 from decimal import Decimal
 from email import encoders
 from email.generator import Generator
 from email.mime.base import MIMEBase
-from email.MIMEMultipart import MIMEMultipart
+from email.mime.multipart import MIMEMultipart
 import smtplib
 import threading
 
@@ -69,7 +69,7 @@ def get_layout_file_path(name):
     raise RuntimeError("Layout file not found: %s" % name)
 
 
-class SendKindleException(StandardError):
+class SendKindleException(Exception):
     pass
 
 
@@ -103,8 +103,8 @@ class SendKindle(object):
         for file_path in files:
             try:
                 msg.attach(self.get_attachment(file_path))
-            except IOError, e:
-                print e
+            except IOError as e:
+                print(e)
                 raise SendKindleException(e)
 
         # convert MIME message to string
@@ -123,8 +123,8 @@ class SendKindle(object):
                 smtp.login(self.smtp_username, self.smtp_password)
             smtp.sendmail(self.user_email, recipient, msg)
             smtp.close()
-        except smtplib.SMTPException, e:
-            print e
+        except smtplib.SMTPException as e:
+            print(e)
             raise SendKindleException(e)
 
     def get_attachment(self, file_path):
@@ -167,7 +167,7 @@ class SendThread(threading.Thread):
             error = False
             try:
                 self.send_kindle_instance.send_mail(*self.args, **self.kwargs)
-            except SendKindleException, e:
+            except SendKindleException as e:
                 error = e
 
         if self.on_done:
